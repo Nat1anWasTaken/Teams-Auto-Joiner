@@ -1,0 +1,21 @@
+webdriver_path: "C:/msedgedriver.exe"
+
+classes:
+  saturday:
+    - name: "Example Class"
+      join_time: "00:00"
+      leave_time: "00:01"
+      thread_url: "https://teams.microsoft.com/_#/school/conversations/..."
+      join_message: "Join Message"
+      leave_message: "Leave Message"
+      notification: false
+
+retry_latency: 60
+
+action_timeout:
+  large: 30
+  medium: 10
+  small: 2
+
+discord_webhook_url: "https://discord.com/api/webhooks/..."
+notification_prefix: "<@...>"
