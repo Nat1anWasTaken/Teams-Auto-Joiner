@@ -72,7 +72,7 @@ def wait_for_element_by_xpath(xpath: str, timeout: int, return_element=True, imp
     except TimeoutException:
         if important:
             log.error("超過時間！")
-        return NoSuchElementException
+        raise NoSuchElementException
 
 
 def generate_webdriver():
@@ -116,7 +116,9 @@ def put_tasks():
         6: "sunday"
     }
     weekday = weekdays[datetime.datetime.now().weekday()]
+    scheduler.clear()
     try:
+        scheduler.every().day.at("00:00").do(put_tasks)
         for class_info in config["classes"][weekday]:
             if class_info["notification"]:
                 scheduler.every().day.at(class_info["join_time"]).do(notification, class_info)
@@ -209,7 +211,14 @@ def join_meet(class_info: dict):
 def hangup_meet(class_info: dict):
     if class_info["leave_message"]:
         send_message(class_info["leave_message"], True)
-    webdriver.find_element(By.XPATH, '//button[@id="hangup-button"]').click()
+    try:
+        webdriver.find_element(By.XPATH, '//button[@id="hangup-button"]').click()
+    except NoSuchElementException:
+        log.warning("沒有找到掛斷按鈕！會議可能已經掛斷", f"掛斷會議｜{class_info['name']}")
+        return schedule.CancelJob
+    except AttributeError:
+        log.warning("沒有找到掛斷按鈕！會議可能已經掛斷", f"掛斷會議｜{class_info['name']}")
+        return schedule.CancelJob
     try:
         wait_for_element_by_xpath('//span[ @ translate - once = "calling_cqf_button_cancel"]',
                                   config["action_timeout"]["small"], True, False).click()
