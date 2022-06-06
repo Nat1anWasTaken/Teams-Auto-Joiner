@@ -1,4 +1,5 @@
 import datetime
+import logging
 import time
 from threading import Thread
 
@@ -6,8 +7,8 @@ import requests
 import schedule
 import yaml
 from selenium import webdriver as wd
-from selenium.common import TimeoutException
-from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import NoSuchElementException, ElementClickInterceptedException, TimeoutException
+from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.edge.options import Options
 from selenium.webdriver.support import expected_conditions as ec
@@ -97,6 +98,8 @@ config = yaml.safe_load(open('config.yml', encoding='utf-8'))
 webdriver = generate_webdriver()
 scheduler = schedule.Scheduler()
 log = Logger(discord_webhook_url=config["discord_webhook_url"], notification_prefix=config["notification_prefix"])
+logger = logging.getLogger('selenium.webdriver.remote.remote_connection')
+logger.setLevel(logging.CRITICAL)
 
 
 def notification(class_info: dict):
@@ -124,7 +127,7 @@ def put_tasks():
                 scheduler.every().day.at(class_info["join_time"]).do(notification, class_info)
             else:
                 scheduler.every().day.at(class_info["join_time"]).do(join_meet, class_info)
-                scheduler.every().day.at(class_info["leave_time"]).do(hangup_meet, class_info)
+                scheduler.every().day.at(class_info["hangup_time"]).do(hangup_meet, class_info)
     except KeyError:
         log.error("沒有設定今天的課堂！")
 
@@ -142,6 +145,8 @@ def send_message(message, skip_check=False):
     if skip_check:
         try:
             webdriver.find_element(By.XPATH, '//button[@id="chat-button" and @track-outcome="15"]').click()
+        except ElementClickInterceptedException:
+            log.info("聊天介面已經打開，或是找不到聊天按鈕！")
         except NoSuchElementException:
             log.info("聊天介面已經打開，或是找不到聊天按鈕！")
     else:
@@ -212,7 +217,8 @@ def hangup_meet(class_info: dict):
     if class_info["leave_message"]:
         send_message(class_info["leave_message"], True)
     try:
-        webdriver.find_element(By.XPATH, '//button[@id="hangup-button"]').click()
+        hangup_button = webdriver.find_element(By.XPATH, '//button[@id="hangup-button"]')
+        ActionChains(webdriver).move_to_element(hangup_button).click().perform()
     except NoSuchElementException:
         log.warning("沒有找到掛斷按鈕！會議可能已經掛斷", f"掛斷會議｜{class_info['name']}")
         return schedule.CancelJob
@@ -223,6 +229,8 @@ def hangup_meet(class_info: dict):
         wait_for_element_by_xpath('//span[ @ translate - once = "calling_cqf_button_cancel"]',
                                   config["action_timeout"]["small"], True, False).click()
     except AttributeError:
+        pass
+    except NoSuchElementException:
         pass
     log.info("已掛斷會議！", f"離開會議｜{class_info['name']}")
     return schedule.CancelJob

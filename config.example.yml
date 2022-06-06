@@ -4,7 +4,7 @@ classes:
   saturday:  # 週六的課堂資訊
     - name: "Example Class"
       join_time: "00:00"
-      leave_time: "00:01"
+      hangup_time: "00:01"
       thread_url: "https://teams.microsoft.com/_#/school/conversations/..."
       join_message: "Join Message"
       leave_message: "Leave Message"
