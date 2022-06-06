@@ -6,7 +6,8 @@
 
 * Python >= 3.10
 * pip >= 21.3.1
-* Microsoft Edge & Microsoft Edge WebDriver
+* Microsoft Edge
+* [Microsoft Edge WebDriver](https://developer.microsoft.com/zh-tw/microsoft-edge/tools/webdriver/) == Microsoft Edge 版本
 
 ## 快速開始
 
