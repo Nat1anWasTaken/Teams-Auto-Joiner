@@ -1,7 +1,7 @@
-webdriver_path: "C:/msedgedriver.exe"
+webdriver_path: "C:/msedgedriver.exe"  # Webdriver 的位置
 
 classes:
-  saturday:
+  saturday:  # 週六的課堂資訊
     - name: "Example Class"
       join_time: "00:00"
       leave_time: "00:01"
@@ -10,12 +10,12 @@ classes:
       leave_message: "Leave Message"
       notification: false
 
-retry_latency: 60
+retry_latency: 60  # 發現頻道沒有會議後的等待時間
 
-action_timeout:
+action_timeout:  # 執行動作的時間限制
   large: 30
   medium: 10
   small: 2
 
-discord_webhook_url: "https://discord.com/api/webhooks/..."
-notification_prefix: "<@...>"
+discord_webhook_url: "https://discord.com/api/webhooks/..."  # 用於通知的 Discord Webhook URL
+notification_prefix: "<@...>"  # 通知的標題前綴，通常用於@mention用戶
